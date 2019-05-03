@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <h1>Blink Homework</h1>
+    <p class="lead">
+        Kayles
+
+    </p>
+    <p><a href="http://flask.pocoo.org/" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Kayles</h2>
+        <p>
+            From [Wikipedia](<a href="https://en.wikipedia.org/wiki/Kayles">https://en.wikipedia.org/wiki/Kayles</a>)
+
+            Kayles is played with a row of tokens, which represent bowling pins. The row may be of any length. The two players alternate; each player, on his or her turn, may remove either any one pin (a ball bowled directly at that pin), or two adjacent pins (a ball bowled to strike both). Under the normal play convention, a player loses when he or she has no legal move (that is, when all the pins are gone [the player who knocks down the last pin wins]).
+        </p>
+        <h2>The Mission</h2>
+        <p>
+            The project is to extend Blinkayles with tournament functionality that can narrow a pool of N players down to 1 winner and 1 runner-up (second place).
+        </p>
+        <p>
+            Requirements:
+            <ul>
+                <li>Single elimination - after each game, the winner remains in the tournament and the loser doesn’t play any more games </li>
+                <li> In the first round, all players compete in 1-vs-1 games. The winners of the first round games compete against each other in the second round, again in 1-vs-1 games.  This continues until the final round, when two players remain, and the winner of that game is the overall winner of the tournament. </li>
+                <li><a href="https://en.wikipedia.org/wiki/Single-elimination_tournament">https://en.wikipedia.org/wiki/Single-elimination_tournament </a> </li>
+                <li> Supports an arbitrary number of tournament participants, including odd numbers.</li>
+            </ul>
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Tournament {{testClass.anystring}} {{testClass.secondString}}</h2>
+        <form action="/tournament", method="post">
+            Number of players:     <input type="number" name="numberofplayers" /> <br /><br />
+            <button type="submit" class="btn btn-primary btn-large">Start new tournament</button>
+        </form>
+        <br />
+        <p>
+            Players remaining in tournament:<br />
+            {% for player in playersLeft %}
+                {{ player }} <br />
+            {% endfor %}
+        </p>
+        <h3>{{ roundName }}</h3>
+        <p>
+            {% for players in gamePlayerList %}
+                {{ players }} <br/>
+            {% endfor %}
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Game </h2>
+        The player who knocks down the last pin wins. <br />
+        <form action="/game" , method="post">
+            Number of pins: <input type="number" name="numberofpins" value="{{numberofpins}}"/><br /><br />
+            <!--<a href="/game" class="btn btn-primary btn-large">Start game</a>-->
+            <button type="submit" class="btn btn-primary btn-large" {{gameenabled}}>Start game </button>
+        </form>
+        <br />
+        <p>
+            {{ gamestatus }} <br />
+            {{ gameplayers }} <br />
+            {{ gamepins }} <br />
+            Current player: {{ currentplayer }} <br />
+        </p>
+        <form action="{{ url_for('moove') }}" , method="post">
+            Pin 1:       <input type="number" name="pin1number" /><br />
+            Pin 2:       <input type="number" name="pin2number" /><br /><br />
+            <input type="submit" class="btn btn-primary btn-large" {{pinsenabled}} />
+        </form>
+    </div>
+</div>
+
+{% endblock %}
