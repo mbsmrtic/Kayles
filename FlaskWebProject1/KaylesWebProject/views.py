@@ -2,35 +2,34 @@
 Routes and views for the flask application.
 """
 
+from flask import Flask
 from datetime import datetime
-import KaylesWebProject
 from flask import render_template
-from KaylesWebProject import app
 from .game import Game
 from .tournament import Tournament
 from flask import request
-
-class TestClass(object):
-    anystring = "anyStringValue"
-    secondString = "secondStringValue"
+from KaylesWebProject import app
 
 @app.route('/')
 @app.route('/home')
 def home():
+    init()
     """Renders the home page."""
-    global tourny
-    global testClass
-    tourny=Tournament(2)
-    testClass = TestClass()
     return render_template(
         'index.html',
         title='Home Page',
         year=datetime.now().year,
-        gameenabled='disabled',
-        pinsenabled='disabled',
-        testClass=testClass,
-        tourny=tourny
+        tourny=tourny,
+        game=game
     )
+
+@app.route('/init', methods=['POST'])
+def init():
+    global tourny
+    global game
+    tourny=Tournament(2)
+    game = Game(tourny.currentPlayers(), 10)
+    return 'Initted'
 
 @app.route('/contact')
 def contact():
@@ -52,61 +51,55 @@ def about():
         message='Your application description page.'
     )
 
-@app.route('/tournament', methods=['POST'])
-def new_tournament():
-    numberOfPlayers = (int)(request.form['numberofplayers'])
-    tourny = Tournament(numberOfPlayers)
+@app.route('/tournament/<numberOfPlayers>', methods=['POST'])
+def new_tournament(numberOfPlayers):
+    tourny.startTournament((int)(numberOfPlayers))
+    game.gameEnabled='enabled'
+    return 'Tournament started!'
+
+@app.route('/tournamentPost', methods=['POST'])
+def new_tournamentPost():
+    new_tournament((int)(request.form['numberofplayers']))
     return render_template(
         'index.html',
         title='Home Page',
         year=datetime.now().year,
-        gameenabled='enabled',
-        numberofpins=10,
-        pinsenabled='disabled',
-        playersLeft=tourny.playerList,
-        roundName=tourny.round,
-        gamePlayerList=tourny.gamePlayerList,
-        testClass=testClass
+        tourny=tourny,
+        game=game
     )
 
-@app.route('/game', methods=['POST'])
-def new_game():
-    global game
-    global tourny
-    numberOfPins = (int)(request.form['numberofpins'])
-    gamestatus='Game started'
-    #If we don't already have a tournament, create one.
-    try: tourny
-    except: 
-        tourny = Tournament(2)
-    if (numberOfPins == ''):
-        numberOfPins=10
-    game = Game(tourny.playerList[0], tourny.playerList[1], numberOfPins)
-    playersLeft=tourny.playerList
+# new_game returns the game status
+@app.route('/game/<numberofpins>', methods=['POST'])
+def new_game(numberofpins):
+    if (numberofpins == ''):
+        numberofpins=10
+    game.startGame(tourny.currentPlayers(), (int)(numberofpins))
+    game.pinsEnabled='enabled'
+    game.gameEnabled='enabled'
+    return '''Game started!
+The player who knocks down the last pin wins.
+Players: {}, {}
+Pins: {}'''.format(game.PLAYER1, game.PLAYER2, game.PINS), 201
 
+@app.route('/gamePost', methods=['POST'])
+def gamePost():
+    numberofpins=(int)(request.form['numberofpins'])
+    new_game(numberofpins)
     return render_template(
         'index.html',
         title='Home Page',
         year=datetime.now().year,
-        gamestatus='Game started',
-        gameplayers='Players: {},{}'.format(game.PLAYER1, game.PLAYER2),
         gamepins='Pins: {}'.format(game.row),
-        gamenabled='enabled',
-        currentplayer=game.PLAYER1,
-        playersLeft=playersLeft,
-        pinsenabled='enabled',
-        numberofpins=game.PINS,
-        testClass=testClass
+        tourny=tourny,
+        game=game
         )
 
-@app.route('/moove', methods=['POST'])
-def moove():
-    pin1number = request.form['pin1number']
-    pin2number = request.form['pin2number']
-    gamestatus = 'Game in progress'
-    gameenabled = 'enabled'
+# move returns the game status
+@app.route('/move/<pin1number>/<pin2number>', methods=['POST'])
+def move(pin1number, pin2number):
+    game.pinsEnabled='enabled'
     if not game or game.is_ended():
-        gamestatus='No active game. POST /game to start a new game.'
+        game.gameStatus='No active game. POST /game to start a new game.'
     
     try:
         if (pin2number.isdigit()):
@@ -114,54 +107,35 @@ def moove():
         else:
             pins = [int(pin1number)]
         game.move(game.turn, pins)
+        game.gameStatus = "{} is up!".format(game.turn)
     except:
-        gamestatus='Invalid move try again.'
+        game.gameStatus='Invalid move try again.'
+
     if (game.is_ended()):
-        gamestatus='{} is the winner!'.format(game.get_winner())
         if (game.get_winner() == game.PLAYER1):
             tourny.removePlayer(game.PLAYER2)
         else:
             tourny.removePlayer(game.PLAYER1)
-        gameenabled='disabled'
+        game.pinsEnabled='disabled'
+        tourny.iGameInRound += 1
+    return game.gameStatus
 
+@app.route('/move/<pin1number>', methods=['POST'])
+def moveOneArg(pin1number):
+    return move(pin1number, '')
+
+@app.route('/movePost', methods=['POST'])
+def movePost():
+    move(request.form['pin1number'], request.form['pin2number'])
     return render_template(
         'index.html',
         title='Home Page',
         year=datetime.now().year,
-        gamestatus=gamestatus,
-        gameplayers='Players: {},{}'.format(game.PLAYER1, game.PLAYER2),
         gamepins='Pins: {}'.format(game.row),
-        currentplayer=game.turn,
-        gameenabled=gameenabled,
-        pinsenabled=gameenabled,
-        playersLeft=tourny.playerList,
-        numberofpins=game.PINS,
-        testClass=testClass
+        tourny=tourny,
+        game=game
         )
 
 
 
-@app.route('/move/<player>/<pins>')
-def move(player, pins):
-    pins = [int(x) for x in pins.split(',')]
 
-    gamestatus='Game in progress'
-    if not game or game.is_ended():
-        gamestatus='No active game. POST /game to start a new game.'
-    
-    game.move(player, pins)
-    if (game.is_ended()):
-        gamestatus='{} is the winner!'.format(game.get_winner())
-    #else:
-    #    gamestatus = game.__str__()
-
-    return render_template(
-        'index.html',
-        title='Home Page',
-        year=datetime.now().year,
-        gamestatus=gamestatus,
-        gameplayers='Players: {},{}'.format(game.PLAYER1, game.PLAYER2),
-        gamepins='Pins: {}'.format(game.row),
-        currentplayer=game.turn,
-        playersLeft=tourny.playerList
-        )

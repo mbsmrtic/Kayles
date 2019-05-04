@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="jumbotron">
-    <h1>Blink Homework</h1>
+    <h1>Kayles Game</h1>
     <p class="lead">
         Kayles
 
@@ -34,44 +34,47 @@
         </p>
     </div>
     <div class="col-md-4">
-        <h2>Tournament {{testClass.anystring}} {{testClass.secondString}}</h2>
-        <form action="/tournament", method="post">
-            Number of players:     <input type="number" name="numberofplayers" /> <br /><br />
+        <h2>Tournament </h2>
+        <form action="/tournamentPost", method="post">
+            Number of players:     <input type="number" name="numberofplayers" min="2" max="40" value="{{tourny.playerCount}}"/> <br /><br />
             <button type="submit" class="btn btn-primary btn-large">Start new tournament</button>
         </form>
         <br />
         <p>
             Players remaining in tournament:<br />
-            {% for player in playersLeft %}
+            {% for player in tourny.playerList %}
                 {{ player }} <br />
             {% endfor %}
         </p>
-        <h3>{{ roundName }}</h3>
+        <h3>Round {{ tourny.round }}</h3>
         <p>
-            {% for players in gamePlayerList %}
+            {% for players in tourny.gamePlayerList %}
                 {{ players }} <br/>
             {% endfor %}
         </p>
+        <h3>
+            {{ tourny.result }}
+        </h3>
     </div>
     <div class="col-md-4">
         <h2>Game </h2>
         The player who knocks down the last pin wins. <br />
-        <form action="/game" , method="post">
-            Number of pins: <input type="number" name="numberofpins" value="{{numberofpins}}"/><br /><br />
+        <form action="/gamePost" , method="post">
+            Number of pins: <input type="number" name="numberofpins" min="1" max="50" value="{{ game.PINS }}" /><br /><br />
             <!--<a href="/game" class="btn btn-primary btn-large">Start game</a>-->
-            <button type="submit" class="btn btn-primary btn-large" {{gameenabled}}>Start game </button>
+            <button type="submit" class="btn btn-primary btn-large" {{game.gameEnabled}}>Start next game </button>
         </form>
         <br />
         <p>
-            {{ gamestatus }} <br />
-            {{ gameplayers }} <br />
+            Players: {{ game.PLAYER1 }} vs {{ game.PLAYER2}} <br />
+            {{ game.gameStatus }} <br />
             {{ gamepins }} <br />
-            Current player: {{ currentplayer }} <br />
+            Current player: {{ game.turn }} <br />
         </p>
-        <form action="{{ url_for('moove') }}" , method="post">
+        <form action="{{ url_for('movePost') }}" , method="post">
             Pin 1:       <input type="number" name="pin1number" /><br />
             Pin 2:       <input type="number" name="pin2number" /><br /><br />
-            <input type="submit" class="btn btn-primary btn-large" {{pinsenabled}} />
+            <input type="submit" class="btn btn-primary btn-large" {{game.pinsEnabled}} />
         </form>
     </div>
 </div>

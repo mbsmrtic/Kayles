@@ -14,12 +14,22 @@ class Game(object):
     PLAYER1, PLAYER2 = 'player1', 'player2'
     PINS = 10
 
-    def __init__(self, playerOneName, playerTwoName, pinCount):
-        self.PLAYER1 = playerOneName
-        self.PLAYER2 = playerTwoName
+    def __init__(self, players, pinCount):
+        self.startGame(players, pinCount)
+        self.gameStatus='Game not started'
+
+    def startGame(self, players, pinCount):
+        self.players = players
+        playersList = players.split(' vs ')
+        self.PLAYER1 = playersList[0]
+        self.PLAYER2 = playersList[1]
         self.PINS = pinCount
         self.row = Row(self.PINS)
         self.turn = self.PLAYER1
+        self.gameEnabled='disabled'
+        self.pinsEnabled='disabled'
+        self.gameStatus='Game started'
+        
 
     def move(self, player, pins):
         if player != self.turn:
@@ -31,7 +41,7 @@ class Game(object):
             self.row.knockdown(pins[0], pins[1])
         else:
             raise InvalidMoveException()
-
+        self.gameStatus='Game in progress'
         self.update_turn()
 
     def update_turn(self):
@@ -44,10 +54,13 @@ class Game(object):
             self.turn = self.PLAYER1
 
     def is_ended(self):
-        return self.row.get_pins_left() == 0
+        if (self.row.get_pins_left() == 0):
+            self.gameStatus='Game ended'
+            return True
 
     def get_winner(self):
         if self.is_ended():
+            self.gameStatus='{} is the winner!'.format(self.turn)
             return self.turn
         else:
             return None
