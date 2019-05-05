@@ -5,7 +5,7 @@
 <div class="jumbotron">
     <h1>Kayles Game</h1>
     <p class="lead">
-        Kayles
+        Mary Beth Smrtic's Kayles game extension
 
     </p>
     <p><a href="http://flask.pocoo.org/" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
@@ -68,7 +68,7 @@
         <p>
             Players: {{ game.PLAYER1 }} vs {{ game.PLAYER2}} <br />
             {{ game.gameStatus }} <br />
-            {{ gamepins }} <br />
+            Pins: {{ game.row }} <br />
             Current player: {{ game.turn }} <br />
         </p>
         <form action="{{ url_for('movePost') }}" , method="post">

@@ -17,6 +17,9 @@ class Game(object):
     def __init__(self, players, pinCount):
         self.startGame(players, pinCount)
         self.gameStatus='Game not started'
+        self.gameEnabled='disabled'
+        self.pinsEnabled='disabled'
+        self.started=False
 
     def startGame(self, players, pinCount):
         self.players = players
@@ -26,12 +29,15 @@ class Game(object):
         self.PINS = pinCount
         self.row = Row(self.PINS)
         self.turn = self.PLAYER1
-        self.gameEnabled='disabled'
-        self.pinsEnabled='disabled'
+        # We won't enable the game buttons until the user has started a tournament
+        self.gameEnabled='enabled'
+        self.pinsEnabled='enabled'
         self.gameStatus='Game started'
+        self.started=True
         
 
     def move(self, player, pins):
+        self.gameStatus='Game in progress'
         if player != self.turn:
             raise InvalidTurnException()
 
@@ -41,7 +47,6 @@ class Game(object):
             self.row.knockdown(pins[0], pins[1])
         else:
             raise InvalidMoveException()
-        self.gameStatus='Game in progress'
         self.update_turn()
 
     def update_turn(self):

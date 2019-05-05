@@ -1,3 +1,7 @@
+class TournamentException:
+    pass
+
+
 class Tournament(object):
     playerCount=0
     playerList=[]
@@ -43,3 +47,6 @@ class Tournament(object):
 
     def removeGame(self, playersNames):
         self.gamePlayerList.remove(playersNames)
+
+    def is_ended(self):
+        return (len(self.playerList) == 1)

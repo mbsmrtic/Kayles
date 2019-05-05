@@ -11,4 +11,5 @@ if __name__ == '__main__':
         PORT = int(environ.get('SERVER_PORT', '4567'))
     except ValueError:
         PORT = 4567
-    app.run(HOST, PORT)
+    print('POST /tournament then /game to start a new game')
+    app.run(HOST, port=PORT)
