@@ -12,7 +12,7 @@ This project is a test project that came from Blink. The original game was a Kay
 	I changed <b>play.sh</b> to test the new tournament functionality. 
 	</li>
 	<li>
-	To better illustrate the functionality, I created a simple Flask based website that allows the user to hit buttons to create a tournament, start a game and submit a move.
+	To better illustrate the functionality, I created a simple Flask based <b>website</b> in which the user can hit buttons to create a tournament, start a game and submit a move.
 	</li>
 </ul>
 
