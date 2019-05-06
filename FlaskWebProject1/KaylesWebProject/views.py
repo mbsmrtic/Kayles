@@ -3,13 +3,16 @@ Routes and views for the flask application.
 """
 
 from flask import Flask
+from KaylesWebProject.game import InvalidMoveException
+from KaylesWebProject.tournament import TournamentNotStartedException
 from datetime import datetime
 from flask import render_template
 from .game import Game
+from .game import GameException
 from .tournament import Tournament
+from .tournament import TournamentException
 from flask import request
 from KaylesWebProject import app
-from .game import GameException
 
 # Init paths 
 @app.route('/')
@@ -37,6 +40,9 @@ def init():
 @app.route('/tournament',defaults={'numberOfPlayers':2}, methods=['POST','GET'])
 @app.route('/tournament/<numberOfPlayers>', methods=['POST','GET'])
 def new_tournament(numberOfPlayers):
+    # If tourny is not yet defined, we need to initialize our variables
+    try: tourny
+    except: init()
     tourny.startTournament((int)(numberOfPlayers))
     return 'Tournament started!'
 
@@ -59,8 +65,11 @@ def new_tournamentPost():
 @app.route('/game',defaults={'numberofpins':4}, methods=['POST','GET'])
 @app.route('/game/<numberofpins>', methods=['POST','GET'])
 def new_game(numberofpins):
-    if (numberofpins == ''):
-        numberofpins=10
+    # If no tournament has been started, raise exception
+    try: 
+        tourny
+    except: 
+        raise TournamentNotStartedException
     game.startGame(tourny.currentPlayers(), (int)(numberofpins))
     return '''Game started!
 The player who knocks down the last pin wins.
@@ -82,27 +91,21 @@ def gamePost():
 
 # Move paths
 # move returns the game status
-@app.route('/move/<pin1number>', defaults={'pin2number':''}, methods=['POST','GET'])
-@app.route('/move/<pin1number>/<pin2number>', methods=['POST','GET'])
-def move(pin1number, pin2number):
-    if not game or game.is_ended() or not game.started:
+@app.route('/move/<pinnumbers>', methods=['POST','GET'])
+def move(pinnumbers):
+    try: game
+    except: raise InvalidMoveException
+    if game.is_ended() or not game.started:
         game.gameStatus='No active game. POST /game to start a new game.'
         return game.gameStatus
-    try:
-        if (pin2number.isdigit()):
-            pins = [int(pin1number), int(pin2number)]
+    game.move(game.turn, pinnumbers)
+    if (game.is_ended()):
+        if (game.get_winner() == game.PLAYER1):
+            tourny.removePlayer(game.PLAYER2)
         else:
-            pins = [int(pin1number)]
-        game.move(game.turn, pins)
-        if (game.is_ended()):
-            if (game.get_winner() == game.PLAYER1):
-                tourny.removePlayer(game.PLAYER2)
-            else:
-                tourny.removePlayer(game.PLAYER1)
-            game.pinsEnabled='disabled'
-            tourny.iGameInRound += 1
-    except:
-        game.gameStatus='Invalid move try again.'
+            tourny.removePlayer(game.PLAYER1)
+        game.pinsEnabled='disabled'
+        tourny.iGameInRound += 1
 
     retval = '''Players: {} vs {}
 {}
@@ -114,7 +117,8 @@ Current player: {}
 
 @app.route('/movePost', methods=['POST'])
 def movePost():
-    move(request.form['pin1number'], request.form['pin2number'])
+    pinnumbers = '{},{}'.format(request.form['pin1number'], request.form['pin2number'])
+    move(pinnumbers)
     if (tourny.is_ended()):
         game.gameEnabled='disabled'
     return render_template(
@@ -133,7 +137,7 @@ def contact():
         'contact.html',
         title='Contact',
         year=datetime.now().year,
-        message='Your contact page.'
+        message='Mary Beth Smrtic'
     )
 
 @app.route('/about')
@@ -141,11 +145,10 @@ def about():
     """Renders the about page."""
     return render_template(
         'about.html',
-        title='About',
-        year=datetime.now().year,
-        message='Your application description page.'
+        year=datetime.now().year
     )
 
+@app.errorhandler(TournamentException)
 @app.errorhandler(GameException)
 def all_exception_handler(error):
     return error.__class__.__name__, 400

@@ -1,6 +1,17 @@
-class TournamentException:
+class TournamentException(Exception):
     pass
 
+class TournamentNotStartedException(TournamentException):
+    pass
+
+class InvalidPlayerCountException(TournamentException):
+    pass
+
+class InvalidPlayerException(TournamentException):
+    pass
+
+class InvalidGameException(TournamentException):
+    pass
 
 class Tournament(object):
     playerCount=0
@@ -12,6 +23,9 @@ class Tournament(object):
         self.startTournament(playerCount)
 
     def startTournament(self, playerCount):
+        if (playerCount < 2 or playerCount > 100):
+            raise InvalidPlayerCountException()
+
         self.playerCount = playerCount
         self.playerList=[]
         self.gamePlayerList=[]
@@ -40,12 +54,16 @@ class Tournament(object):
         return self.gamePlayerList[self.iGameInRound]
 
     def removePlayer(self, playerName):
+        if playerName not in self.playerList:
+            raise InvalidPlayerException
         self.playerList.remove(playerName)
         if (len(self.playerList) == 1):
             self.result = '''{} wins the tournament! 
 {} is runner up'''.format(self.playerList[0], playerName)
 
     def removeGame(self, playersNames):
+        if playersNames not in self.gamePlayerList:
+            raise InvalidGameException
         self.gamePlayerList.remove(playersNames)
 
     def is_ended(self):

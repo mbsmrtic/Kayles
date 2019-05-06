@@ -10,6 +10,7 @@ class InvalidTurnException(GameException):
     pass
 
 
+
 class Game(object):
     PLAYER1, PLAYER2 = 'player1', 'player2'
     PINS = 10
@@ -36,15 +37,18 @@ class Game(object):
         self.started=True
         
 
-    def move(self, player, pins):
-        self.gameStatus='Game in progress'
+    def move(self, player, pinnumbers):
         if player != self.turn:
             raise InvalidTurnException()
 
-        if len(pins) == 1:
-            self.row.knockdown(pins[0])
-        elif len(pins) == 2:
-            self.row.knockdown(pins[0], pins[1])
+        self.gameStatus='Game in progress'
+        pinArray = pinnumbers.split(',')
+
+        if  ((len(pinArray) == 1 and pinArray[0].isdigit()) or 
+             (len(pinArray) == 2 and not pinArray[1].isdigit())):
+            self.row.knockdown(int(pinArray[0]))
+        elif len(pinArray) == 2 and pinArray[0].isdigit() and pinArray[1].isdigit():
+            self.row.knockdown(int(pinArray[0]), int(pinArray[1]))
         else:
             raise InvalidMoveException()
         self.update_turn()
