@@ -1,5 +1,17 @@
 # About this project
 
+This project is a test project that came from Blink. The original game was a Kayles game application that runs in the console. I extended the game functionality according to the instructions.
+I created a tournament class. A tournament can take an arbitrary number of players. It assigns each player a name from player0 to playerN. The tournament calculates the first round.
+A round contains a list of games 'player0 vs player1', 'player2 vs player3'...  After each game the losing player is removed from the tournament.
+After the first round is complete, the second round is calculated.  
+<br>
+I changed play.sh to test the new tournament functionality. 
+<br>
+To better illustrate the functionality, I created a simple Flask based website that allows the user to hit buttons to create a tournament, start a game and submit a move.
+
+
+# Original instructions
+
 - You should expect to spend about 3 hours on this.
 - We'll consider both the correctness and the clarity of your code, including things like test coverage, idiomatic use of the chosen language, and git history. Work on it until you're satisfied and feel it represents the quality of work you would produce in a professional environment.
 - Be prepared to present your solution and discuss it when you arrive at Blink's office.
