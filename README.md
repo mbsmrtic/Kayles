@@ -1,6 +1,6 @@
 # About this project
 
-This project is a test project that came from Blink. The original game was a Kayles game application that runs in the console. I extended the game functionality according to the instructions.
+This project is a test project that came from Blink. The original game was a Kayles game application that runs in the console. I extended the python version of the game functionality according to the instructions.
 <br>
 <ul>
 	<li>
@@ -15,6 +15,21 @@ This project is a test project that came from Blink. The original game was a Kay
 	To better illustrate the functionality, I created a simple Flask based <b>website</b> in which the user can hit buttons to create a tournament, start a game and submit a move.
 	</li>
 </ul>
+
+The game now has 3 endpoints:
+
+### POST `/tournament[/<numberOfPlayers>]`
+
+Begin a new tournament
+
+### POST `/game[/<numberofpins>]`
+
+Begin a game in the current tournament.  Note that the game now keeps track of whose turn it is, so the user does not pass that in as an argument.
+The tournament keeps track of which two players are in the current game.  
+
+### POST `/move/<pin>[,<pin>]`
+
+Knock down one or two pins
 
 # Original instructions
 
